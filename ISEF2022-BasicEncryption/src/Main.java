@@ -15,15 +15,15 @@ public class Main {
                 response = input.nextLine().toLowerCase();
             }
 
-            int keyFind1 = 1697432123;//11
-            int keyFind2 = 1073741789;//13
-            int n = keyFind1 * keyFind2;
-            BigInteger e = new BigInteger("1672773"); // must be relatively prime to (keyFind1 - 1)(keyFind2 - 1)      7
-            BigInteger d = new BigInteger("2447384868165838171");  //223
+            String encrypted = "";
+            BigInteger keyFind1 = new BigInteger("1697432123");//11
+            BigInteger keyFind2 = new BigInteger("1073741789");//13
+            BigInteger n = keyFind1.multiply(keyFind2);
+            BigInteger e = new BigInteger("1672771"); // must be relatively prime to (keyFind1 - 1)(keyFind2 - 1)      7
+            BigInteger d = new BigInteger("18850819083330065395");  //223
             // find d with this equation: e * d mod ((keyFind1 - 1)(keyFind2 - 1)) = 1
             //private key is e and d, public key is e and n
-            int[] cTextArray;
-            BigInteger bigN = new BigInteger(String.valueOf(n));
+            String[] cTextArray;
 
             if (response.equals("encrypt")) {
                 System.out.println("Enter the text you wish to encrypt");
@@ -38,27 +38,16 @@ public class Main {
                 }
 
 
-                cTextArray = new int[pText.length()];
-
                 for (int i = 0; i < pTextArray.length; i++) {
                     BigInteger pTextASCII = new BigInteger(String.valueOf(pTextMath[i]));
-                    System.out.println(pTextASCII);
-                    BigInteger cTextMath = pTextASCII.modPow(e, bigN);
-                    System.out.println(cTextMath);
-                    int cText = cTextMath.intValue();
-                    cTextArray[i] = cText;
-                }
-
-                String encrypted = "";
-
-                for(int i = 0; i < cTextArray.length; i++){
-                    String temp = String.valueOf(cTextArray[i]);
-                    if (temp.length() == 1){
-                        encrypted += "00" + temp;
-                    } else if (temp.length() == 2){
-                        encrypted += "0" + temp;
+                    BigInteger cTextMath = pTextASCII.modPow(e, n);
+                    String cText = String.valueOf(cTextMath);
+                    if (cText.length() == String.valueOf(n).length()-2){
+                        encrypted += "00" + cText;
+                    } else if (cText.length() == String.valueOf(n).length()-1){
+                        encrypted += "0" + cText;
                     } else {
-                        encrypted += temp;
+                        encrypted += cText;
                     }
                 }
 
@@ -69,13 +58,13 @@ public class Main {
             } else if (response.equals("decrypt")) {
                 System.out.println("Enter the number to decrypt");
                 String decrypt = input.nextLine();
-                int length = decrypt.length()/3;
-                cTextArray = new int[length];
+                int length = decrypt.length()/String.valueOf(n).length();
+                cTextArray = new String[length];
                 int index = 0;
 
-                for(int i = 0; i < decrypt.length(); i += 3){
-                    String val = decrypt.substring(i, i+3);
-                    cTextArray[index] = Integer.parseInt(val);
+                for(int i = 0; i < decrypt.length(); i += String.valueOf(n).length()){
+                    String val = decrypt.substring(i, i+String.valueOf(n).length());
+                    cTextArray[index] = val;
                     index++;
                 }
 
@@ -83,7 +72,7 @@ public class Main {
 
                 for (int i = 0; i < cTextArray.length; i++) {
                     BigInteger unencrypt = new BigInteger(String.valueOf(cTextArray[i]));
-                    BigInteger calculated = unencrypt.modPow(d, bigN);
+                    BigInteger calculated = unencrypt.modPow(d, n);
                     char fText = (char) calculated.intValue();
                     fTextArray[i] = fText;
                 }
